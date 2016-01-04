@@ -1,0 +1,11 @@
+Dockerfile
+*~
+.git
+.gitignore
+
+.idea/
+*.iml
+
+target/
+data/
+*.zip
