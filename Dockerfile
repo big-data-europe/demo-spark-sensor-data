@@ -17,6 +17,6 @@ RUN apt-get install -y maven \
       && mkdir -p /app \
       && cd /usr/src/app \
       && mvn clean package \
-      && cp target/spark-sensor-demo-1.0-with-dependencies.jar /app/application.jar
+      && cp target/spark-sensor-demo-1.1-SNAPSHOT-with-dependencies.jar /app/application.jar
 
 CMD ["/bin/bash", "/demo.sh"]
