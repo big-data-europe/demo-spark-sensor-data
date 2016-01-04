@@ -12,9 +12,9 @@ In our setting we receive a large set of data inputs in a simple format and are 
 The main application class is `com.tenforce.bde.spark.demo.sensors.Application`.
 The application requires as application arguments:
 
-1. owner (e.g. `localhost`)
-2. path to the input folder containing the sensor data as CSV (e.g. `/data/input`)
-3. path to the output folder to write the resulting JSON to (e.g. `/data/output`)
+1. owner (default: `localhost`)
+2. path to the input folder containing the sensor data as CSV (default: `/data/input`)
+3. path to the output folder to write the resulting JSON to (default: `/data/output`)
 
 All Spark workers should have access to the `/data/input` and `/data/output` directories.
 
@@ -23,22 +23,7 @@ All Spark workers should have access to the `/data/input` and `/data/output` dir
 To run the application on a standalone Spark cluster
 
 1. Setup a Spark cluster as described on http://github.com/big-data-europe/docker-spark
-2. Build the application with Maven
+2. Build the Docker image: `docker build --rm=true -t bde/spark-demo .`
+3. Run the Docker container: `docker run --link spark-master:spark-master -d bde/spark-demo`
 
-  ```
-  cd /path/to/application
-  mvn clean package
-  ```
-
-3. Submit the application to the Spark cluster
-
-  ```
-  docker run --name spark-demo \
-      --link spark-master:spark-master \
-      --entrypoint /spark/bin/spark-submit \
-      --volume /path/to/application/target/spark-sensor-demo-1.0-SNAPSHOT-with-dependencies.jar:/app/application.jar \
-      -d bde2020/spark-base:1.5.1-hadoop2.6 \
-          --class com.tenforce.bde.spark.demo.sensors.Application \
-          --master spark://spark-master:7077 \
-          /app/application.jar localhost /data/input /data/output
-  ```
+The application runtime arguments can be configured by setting the `APP_ARGS_OWNER`, `APP_ARGS_INPUT` and `APP_ARGS_OUTPUT` environment variables at container runtime. E.g.  `docker run --link spark-master:spark-master -e APP_ARGS_OWNER=foo -d bde/spark-demo`
