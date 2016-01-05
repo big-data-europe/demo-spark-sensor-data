@@ -32,12 +32,11 @@ import java.util.Map;
 
 public class Application {
 
-  private static int MAX_DETAIL = 128;
   private static ObjectMapper objectMapper = new ObjectMapper();
 
   public static void main(String[] args) throws IOException, URISyntaxException {
-    if(args.length < 3) {
-      throw new IllegalArgumentException("Owner, input and output folder must be passed as arguments");
+    if(args.length < 4) {
+      throw new IllegalArgumentException("Owner, max_detail, input and output folder must be passed as arguments");
     }
 
     String sparkMasterUrl = System.getenv("SPARK_MASTER_URL");
@@ -51,11 +50,12 @@ public class Application {
     }
 
     String owner = args[0];
-    String inputArg = args[1];
-    if(!inputArg.endsWith("/")) { inputArg += inputArg + "/"; }
+    int maxDetail = Integer.parseInt(args[1]);
+    String inputArg = args[2];
+    if(!inputArg.endsWith("/")) { inputArg += "/"; }
     String csvFile = hdfsUrl + inputArg + owner + ".csv";
-    String outputArg = args[2];
-    if(!outputArg.endsWith("/")) { outputArg += outputArg + "/"; }
+    String outputArg = args[3];
+    if(!outputArg.endsWith("/")) { outputArg += "/"; }
     String outputPath = outputArg + owner;
 
     SparkConf sparkConf = new SparkConf().setAppName("BDE-SensorDemo").setMaster(sparkMasterUrl);
@@ -70,7 +70,7 @@ public class Application {
     LocalDateTime maxTimestamp = measurements.max(new TimestampComparator()).getTimestamp();
     long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);
 
-    for(int detail = 1; detail <= MAX_DETAIL; detail *= 2) {
+    for(int detail = 1; detail <= maxDetail; detail *= 2) {
       long timeStep = duration / detail;
       String detailPath = outputPath + "/" + detail;
 
