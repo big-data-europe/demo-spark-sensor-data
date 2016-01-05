@@ -7,6 +7,8 @@ public class Measurement implements Serializable {
 
   private Coordinate coordinate;
 
+  private Coordinate roundedCoordinate;
+
   private LocalDateTime timestamp;
 
   public Measurement(Coordinate coordinate, LocalDateTime timestamp) {
@@ -20,6 +22,14 @@ public class Measurement implements Serializable {
 
   public void setCoordinate(Coordinate coordinate) {
     this.coordinate = coordinate;
+  }
+
+  public Coordinate getRoundedCoordinate() {
+    return roundedCoordinate;
+  }
+
+  public void setRoundedCoordinate(Coordinate roundedCoordinate) {
+    this.roundedCoordinate = roundedCoordinate;
   }
 
   public LocalDateTime getTimestamp() {

@@ -52,4 +52,12 @@ public class Coordinate implements Serializable {
     result = 31 * result + (int) (temp ^ (temp >>> 32));
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "Coordinate{" +
+      "latitude=" + latitude +
+      ", longitude=" + longitude +
+      '}';
+  }
 }
