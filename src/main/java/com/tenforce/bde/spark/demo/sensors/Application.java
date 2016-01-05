@@ -1,9 +1,12 @@
 package com.tenforce.bde.spark.demo.sensors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tenforce.bde.spark.demo.sensors.model.Coordinate;
 import com.tenforce.bde.spark.demo.sensors.model.Measurement;
-import com.tenforce.bde.spark.demo.sensors.model.ResultEntry;
 import com.tenforce.bde.spark.demo.sensors.utils.TimestampComparator;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -14,31 +17,51 @@ import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
-import org.apache.spark.sql.SaveMode;
 import scala.Tuple2;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Application {
 
   private static int MAX_DETAIL = 128;
-//  private static String SPARK_MASTER = "local[4]";
-  private static String SPARK_MASTER = "spark://spark-master:7077";
+  private static ObjectMapper objectMapper = new ObjectMapper();
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, URISyntaxException {
     if(args.length < 3) {
       throw new IllegalArgumentException("Owner, input and output folder must be passed as arguments");
     }
-    String owner = args[0];
-    String csvFile = args[1] + "/" + owner + ".csv";
-    String outputPath = args[2] + "/" + owner;
 
-    SparkConf sparkConf = new SparkConf().setAppName("BDE-SensorDemo").setMaster(SPARK_MASTER);
+    String sparkMasterUrl = System.getenv("SPARK_MASTER_URL");
+    if(StringUtils.isBlank(sparkMasterUrl)) {
+      throw new IllegalStateException("SPARK_MASTER_URL environment variable must be set.");
+    }
+
+    String hdfsUrl = System.getenv("HDFS_URL");
+    if(StringUtils.isBlank(hdfsUrl)) {
+      throw new IllegalStateException("HDFS_URL environment variable must be set");
+    }
+
+    String owner = args[0];
+    String inputArg = args[1];
+    if(!inputArg.endsWith("/")) { inputArg += inputArg + "/"; }
+    String csvFile = hdfsUrl + inputArg + owner + ".csv";
+    String outputArg = args[2];
+    if(!outputArg.endsWith("/")) { outputArg += outputArg + "/"; }
+    String outputPath = outputArg + owner;
+
+    SparkConf sparkConf = new SparkConf().setAppName("BDE-SensorDemo").setMaster(sparkMasterUrl);
     JavaSparkContext sparkContext = new JavaSparkContext(sparkConf);
     SQLContext sqlContext = new SQLContext(sparkContext);
+    FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkContext.hadoopConfiguration());
 
     JavaRDD<Measurement> measurements = csvToMeasurements(sqlContext, csvFile);
     JavaRDD<Measurement> measurementsWithRoundedCoordinates = roundCoordinates(measurements);
@@ -53,16 +76,17 @@ public class Application {
 
       for(int i = 0; i < detail; i++) {
         LocalDateTime start = minTimestamp.plus(timeStep * i, ChronoUnit.MILLIS);
-        LocalDateTime end = minTimestamp.plus(timeStep * (i+1), ChronoUnit.MILLIS);
+        LocalDateTime end = minTimestamp.plus(timeStep * (i + 1), ChronoUnit.MILLIS);
         JavaRDD<Measurement> measurementsFilteredByTime = filterByTime(measurementsWithRoundedCoordinates, start, end);
         JavaPairRDD<Coordinate, Integer> counts = countPerGridBox(measurementsFilteredByTime);
-        JavaRDD<ResultEntry> results = convertToResult(counts);
 
-        String fileName = detailPath + "/" + (i+1);
-        sqlContext.createDataFrame(results, ResultEntry.class).write().mode(SaveMode.Overwrite).json(fileName);
+        String fileName = detailPath + "/" + (i+1) + ".json";
+        OutputStream outputStream = hdfs.create(new Path(fileName), true);
+        writeJson(counts, objectMapper, outputStream);
       }
     }
 
+    hdfs.close();
     sparkContext.close();
     sparkContext.stop();
   }
@@ -161,21 +185,30 @@ public class Application {
   }
 
   /**
-   * Maps the tuples of coordinates and counts to serializable result objects
-   *
-   * @param tuples | Set of tuples linking coordinates to a count
-   * @return A set of serializable result objects
+   * Write the result as JSON to the given outputstream
+   * @param tuples | The dataset of rounded coordinates with their number of occurrences
+   * @param objectMapper | ObjectMapper to map a Java object to a JSON string
+   * @param outputStream | Outputstream to write the JSON to
+   * @throws IOException
    */
-  private static JavaRDD<ResultEntry> convertToResult(JavaPairRDD<Coordinate, Integer> tuples) {
-    return tuples.map(
-      new Function<Tuple2<Coordinate, Integer>, ResultEntry>() {
+  private static void writeJson(JavaPairRDD<Coordinate, Integer> tuples, ObjectMapper objectMapper, OutputStream outputStream) throws IOException {
+    List<Map<String, Object>> gridBoxes = tuples.map(
+      new Function<Tuple2<Coordinate, Integer>, Map<String, Object>>() {
         @Override
-        public ResultEntry call(Tuple2<Coordinate, Integer> tuple) throws Exception {
+        public Map<String, Object> call(Tuple2<Coordinate, Integer> tuple) throws Exception {
           Coordinate coordinate = tuple._1();
-          return new ResultEntry(coordinate.getLatitude(), coordinate.getLongitude(), tuple._2());
+          Map<String, Object> gridBox = new HashMap<>();
+          gridBox.put("latitude", coordinate.getLatitude());
+          gridBox.put("longitude", coordinate.getLongitude());
+          gridBox.put("count", tuple._2());
+          return gridBox;
         }
       }
-    );
-  }
+    ).collect();
 
+    Map<String, Object> data = new HashMap<>();
+    data.put("data", gridBoxes);
+    objectMapper.writeValue(outputStream, data);
+    outputStream.close();
+  }
 }
