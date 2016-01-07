@@ -18,10 +18,10 @@ The application requires HDFS and a Spark cluster. To run the application, execu
 
 The application requires 4 arguments. They can be overwritten at runtime by passing them as environment variables:
 
-1. APP_ARGS_OWNER: owner (default: `localhost`)
-2. APP_ARGS_MAX_DETAIL: maximum level of refinement of the grid (default: `128`)
-3. APP_ARGS_INPUT: path to the input folder on HDFS containing the sensor data as CSV (default: `/input`)
-4. APP_ARGS_OUTPUT: path to the output folder on HDFS to write the resulting JSON to (default: `/output`)
+1. `APP_ARGS_OWNER`: owner (default: `localhost`)
+2. `APP_ARGS_MAX_DETAIL`: maximum level of refinement of the grid (default: `128`)
+3. `APP_ARGS_INPUT`: path to the input folder on HDFS containing the sensor data as CSV (default: `/input`)
+4. `APP_ARGS_OUTPUT`: path to the output folder on HDFS to write the resulting JSON to (default: `/output`)
 
 The HDFS namenode location can be configured through the environment variable `HDFS_URL` which is set to `hdfs://hdfs:9000` by default. All Spark workers should have access to HDFS with this same URL, so make sure to link the HDFS container with the correct alias to the Spark worker containers.
 
