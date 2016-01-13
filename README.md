@@ -11,7 +11,7 @@ In our setting we receive a large set of data inputs in a simple format and are 
 ## Running the demo application
 The application requires HDFS and a Spark cluster. To run the application, execute the following steps:
 
-1. Setup a single node HDFS in a Docker container by running `dr run -it --name hdfs sequenceiq/hadoop-docker:2.6.0 /etc/bootstrap.sh -bash`
+1. Setup a single node HDFS in a Docker container by running `docker run -it --name hdfs sequenceiq/hadoop-docker:2.6.0 /etc/bootstrap.sh -bash`
 2. Setup a Spark cluster as described on http://github.com/big-data-europe/docker-spark. Make sure the Spark workers have a link to HDFS.
 3. Build the Docker image: `docker build --rm=true -t bde/spark-demo .`
 4. Run the Docker container: `docker run --link spark-master:spark-master --link hdfs:hdfs -d bde/spark-demo`
