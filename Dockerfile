@@ -1,4 +1,4 @@
-FROM bde2020/spark-java-template:1.5.1-hadoop2.6
+FROM bde2020/spark-java-template:poc-init-daemon
 
 MAINTAINER Erika Pauwels <erika.pauwels@tenforce.com>
 
