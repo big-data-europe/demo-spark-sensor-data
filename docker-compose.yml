@@ -54,7 +54,7 @@ services:
     environment:
       BOOT: mu-cl-resources
 
-  networks:
-    default:
-      driver: overlay
+networks:
+  default:
+    driver: overlay
 
