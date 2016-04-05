@@ -41,12 +41,12 @@ services:
     volumes:
       - ./config/dispatcher:/config
   database:
-    image: tenforce/virtuoso:virtuoso-v7.2.0-latest
+    image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
     environment:
       SPARQL_UPDATE: "true"
       DEFAULT_GRAPH: http://mu.semte.ch/application
     volumes:
-      - ./data/db/toLoad:/var/lib/virtuoso/db/toLoad
+      - ./data/db/toLoad:/data/db/toLoad
   resource:
     image: semtech/mu-cl-resources:1.1.0
     volumes:
