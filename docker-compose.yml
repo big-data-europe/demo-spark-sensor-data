@@ -1,6 +1,9 @@
 version: '2'
 
 services:
+  ###
+  # Spark sensor demo pipeline
+  ###
   hdfs:
     image: sequenceiq/hadoop-docker:2.6.0
     volumes:
@@ -8,26 +11,25 @@ services:
     environment:
       INIT_DAEMON_STEP: setup_hdfs
   master:
-    image: bde2020/spark-master:poc-init-daemon
+    image: bde2020/spark-master:1.5.1-hadoop2.6
     hostname: spark-master
     environment:
       INIT_DAEMON_STEP: setup_spark
     volumes:
       - ./data/spark-master:/data
   worker:
-    image: bde2020/spark-worker:poc-init-daemon
+    image: bde2020/spark-worker:1.5.1-hadoop2.6
     links:
       - "master:spark-master"
   demo:
-    image: bde2020/demo-spark-sensor-data:poc-init-daemon
+    image: bde2020/demo-spark-sensor-data:v1.2.0
     environment:
       INIT_DAEMON_STEP: compute_aggregations
     links:
       - "master:spark-master"
-  initdaemon:
-    image: erikap/poc-init-daemon-service:latest
-    environment:
-       MU_APPLICATION_GRAPH: http://mu.semte.ch/application
+  ###
+  # mu.semte.ch stack
+  ###
   frontend:
     image: madnificent/ember-pipeline-frontend-poc:0.2.0
     ports:
@@ -39,22 +41,22 @@ services:
   dispatcher:
     image: semtech/mu-dispatcher:1.0.1
     volumes:
-      - ./config/dispatcher:/config
+      - ./config:/config
   database:
-    image: tenforce/virtuoso:virtuoso-v7.2.0-latest
+    image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
     environment:
       SPARQL_UPDATE: "true"
       DEFAULT_GRAPH: http://mu.semte.ch/application
+    ports:
+      - "8890:8890"
     volumes:
-      - ./data/db/toLoad:/var/lib/virtuoso/db/toLoad
-  resource:
-    image: semtech/mu-cl-resources:1.1.0
-    volumes:
-      - ./config/resources:/config
-    environment:
-      BOOT: mu-cl-resources
+      - ./data/db:/data
+  pipeline:
+    image: bde2020/pipeline-service:0.1.0
+  initdaemon:
+    image: bde2020/init-daemon-service:0.1.0
 
-  networks:
-    default:
-      driver: overlay
+networks:
+  default:
+    driver: overlay
 
