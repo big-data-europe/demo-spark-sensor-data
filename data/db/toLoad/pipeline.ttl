@@ -1,0 +1,49 @@
+@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ns1:	<http://purl.org/spar/pwo/> .
+<http://www.big-data-europe.eu/data/workflows/56C50B1491819C0009000001>	rdf:type	ns1:Workflow .
+@prefix ns2:	<http://mu.semte.ch/vocabularies/core/> .
+<http://www.big-data-europe.eu/data/workflows/56C50B1491819C0009000001>	ns2:uuid	"56C50B1491819C0009000001" .
+@prefix ns3:	<http://purl.org/dc/terms/> .
+<http://www.big-data-europe.eu/data/workflows/56C50B1491819C0009000001>	ns3:title	"Sensor demo" ;
+	ns3:description	"Vincent's fantastic sensor Spark app" ;
+	ns1:hasStep	<http://www.big-data-europe.eu/data/steps/56C51784DEAA160009000004> ,
+		<http://www.big-data-europe.eu/data/steps/56C51724DEAA160009000003> ,
+		<http://www.big-data-europe.eu/data/steps/56C5125CDEAA160009000001> ,
+		<http://www.big-data-europe.eu/data/steps/56C51356DEAA160009000002> ,
+		<http://www.big-data-europe.eu/data/steps/56C50B5391819C0009000002> .
+<http://www.big-data-europe.eu/data/steps/56C50B5391819C0009000002>	rdf:type	ns1:Step ;
+	ns2:uuid	"56C50B5391819C0009000002" ;
+	ns3:title	"Setup HDFS" ;
+	ns3:description	"Booting of the HDFS cluster." .
+@prefix ns4:	<http://www.big-data-europe.eu/vocabularies/pipeline/> .
+<http://www.big-data-europe.eu/data/steps/56C50B5391819C0009000002>	ns4:code	"setup_hdfs" ;
+	ns4:order	1 ;
+	ns4:status	"not_started" .
+<http://www.big-data-europe.eu/data/steps/56C5125CDEAA160009000001>	rdf:type	ns1:Step ;
+	ns2:uuid	"56C5125CDEAA160009000001" ;
+	ns3:title	"Populate HDFS with core data" ;
+	ns3:description	"Please upload the location data to the HDFS filesystem.  This is a manual step.  Press finish when you're done" ;
+	ns4:code	"populate_hdfs" ;
+	ns4:order	3 ;
+	ns4:status	"not_started" .
+<http://www.big-data-europe.eu/data/steps/56C51356DEAA160009000002>	rdf:type	ns1:Step ;
+	ns2:uuid	"56C51356DEAA160009000002" ;
+	ns3:title	"Setup SPARK" ;
+	ns3:description	"Starts the spark manager and workers." ;
+	ns4:code	"setup_spark" ;
+	ns4:order	2 ;
+	ns4:status	"not_started" .
+<http://www.big-data-europe.eu/data/steps/56C51724DEAA160009000003>	rdf:type	ns1:Step ;
+	ns2:uuid	"56C51724DEAA160009000003" ;
+	ns3:title	"Aggregate location data" ;
+	ns3:description	"Spark map-reduce computation which aggregates the data in a consumable format." ;
+	ns4:code	"compute_aggregations" ;
+	ns4:order	4 ;
+	ns4:status	"not_started" .
+<http://www.big-data-europe.eu/data/steps/56C51784DEAA160009000004>	rdf:type	ns1:Step ;
+	ns2:uuid	"56C51784DEAA160009000004" ;
+	ns3:title	"Retrieve aggregated content" ;
+	ns3:description	"Download the content from HDFS onto a separate location before destroying the pipeline.  This is a manual step." ;
+	ns4:code	"download_data" ;
+	ns4:order	5 ;
+	ns4:status	"not_started" .

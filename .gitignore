@@ -16,5 +16,4 @@ hs_err_pid*
 *.iml
 
 target/
-data/
 *.zip
