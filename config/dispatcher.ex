@@ -14,11 +14,11 @@ defmodule Dispatcher do
   plug :dispatch
 
   match "/pipelines/*path" do
-    Proxy.forward conn, path, "http://resource/pipelines/"
+    Proxy.forward conn, path, "http://pipeline/pipelines/"
   end
 
   match "/steps/*path" do
-    Proxy.forward conn, path, "http://resource/steps/"
+    Proxy.forward conn, path, "http://pipeline/steps/"
   end
 
   match "/init-daemon/*path" do
