@@ -4,12 +4,38 @@ services:
   ###
   # Spark sensor demo pipeline
   ###
-  hdfs:
-    image: sequenceiq/hadoop-docker:2.6.0
+  namenode:
+    image: bde2020/hadoop-namenode:1.0.0
+    hostname: namenode
     volumes:
-      - ./data/hdfs:/data
+      - ./data/hadoop/namenode:/hadoop/dfs/name
     environment:
+      CLUSTER_NAME: test
       INIT_DAEMON_STEP: setup_hdfs
+    env_file:
+      - ./config/hadoop/hadoop.env
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:1.0.0
+    hostname: resourcemanager
+    env_file:
+      - ./config/hadoop/hadoop.env
+  historyserver:
+    image: bde2020/hadoop-historyserver:1.0.0
+    hostname: historyserver
+    volumes:
+      - ./data/hadoop/historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./config/hadoop/hadoop.env
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:1.0.0
+    hostname: nodemanager
+    env_file:
+      - ./config/hadoop/hadoop.env
+  datanode:
+    image: bde2020/hadoop-datanode:1.0.0
+    hostname: datanode
+    env_file:
+      - ./config/hadoop/hadoop.env
   master:
     image: bde2020/spark-master:1.5.1-hadoop2.6
     hostname: spark-master
@@ -25,6 +51,7 @@ services:
     image: bde2020/demo-spark-sensor-data:v1.2.0
     environment:
       INIT_DAEMON_STEP: compute_aggregations
+      HDFS_URL: hdfs://namenode:8020
     links:
       - "master:spark-master"
   ###
