@@ -49,6 +49,13 @@ services:
     hostname: datanode
     env_file:
       - ./config/hadoop/hadoop.env
+  filebrowser:
+    image: bde2020/hdfs-filebrowser
+    hostname: filebrowser
+    environment:
+      NAMENODE_HOST: namenode
+      VIRTUAL_HOST: hue.demo.big-data-europe.local
+      VIRTUAL_PORT: 8088
   master:
     image: bde2020/spark-master:1.5.1-hadoop2.6
     hostname: spark-master
