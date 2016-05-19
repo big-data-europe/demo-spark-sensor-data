@@ -8,7 +8,7 @@ services:
     image: bde2020/hadoop-namenode:1.0.0
     hostname: namenode
     volumes:
-      - ./data/hadoop/namenode:/hadoop/dfs/name
+      - /home/docker/demo-spark-sensor-data/data/hadoop/namenode:/hadoop/dfs/name
     environment:
       CLUSTER_NAME: test
       INIT_DAEMON_STEP: setup_hdfs
@@ -23,7 +23,7 @@ services:
     image: bde2020/hadoop-historyserver:1.0.0
     hostname: historyserver
     volumes:
-      - ./data/hadoop/historyserver:/hadoop/yarn/timeline
+      - /home/docker/demo-spark-sensor-data/data/hadoop/historyserver:/hadoop/yarn/timeline
     env_file:
       - ./config/hadoop/hadoop.env
   nodemanager:
@@ -42,7 +42,7 @@ services:
     environment:
       INIT_DAEMON_STEP: setup_spark
     volumes:
-      - ./data/spark-master:/data
+      - /home/docker/demo-spark-sensor-data/data/spark-master:/data
   worker:
     image: bde2020/spark-worker:1.5.1-hadoop2.6
     links:
@@ -74,7 +74,7 @@ services:
   dispatcher:
     image: semtech/mu-dispatcher:1.0.1
     volumes:
-      - ./config:/config
+      - /home/docker/demo-spark-sensor-data/config:/config
   database:
     image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
     environment:
@@ -83,7 +83,7 @@ services:
     ports:
       - "8890:8890"
     volumes:
-      - ./data/db:/data
+      - /home/docker/demo-spark-sensor-data/data/db:/data
   pipeline:
     image: bde2020/pipeline-service:0.1.0
   initdaemon:
