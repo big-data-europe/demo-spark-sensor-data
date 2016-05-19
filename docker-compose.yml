@@ -73,7 +73,7 @@ services:
       VIRTUAL_HOST: spark-worker.demo.big-data-europe.local
       VIRTUAL_PORT: 8081
   demo:
-    image: bde2020/demo-spark-sensor-data:v1.2.0
+    image: bde2020/demo-spark-sensor-data:2.0.0
     environment:
       INIT_DAEMON_STEP: compute_aggregations
       HDFS_URL: hdfs://namenode:8020
