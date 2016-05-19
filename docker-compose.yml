@@ -9,14 +9,23 @@ services:
     hostname: namenode
     volumes:
       - /home/docker/demo-spark-sensor-data/data/hadoop/namenode:/hadoop/dfs/name
+    expose:
+      - "50070"
     environment:
       CLUSTER_NAME: test
       INIT_DAEMON_STEP: setup_hdfs
+      VIRTUAL_HOST: hdfs-namenode.demo.big-data-europe.local
     env_file:
       - ./config/hadoop/hadoop.env
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:1.0.0
     hostname: resourcemanager
+    expose:
+      - "8031"
+      - "8088"
+    environment:
+      VIRTUAL_HOST: hdfs-resourcemanager.demo.big-data-europe.local
+      VIRTUAL_PORT: 8088
     env_file:
       - ./config/hadoop/hadoop.env
   historyserver:
@@ -29,6 +38,10 @@ services:
   nodemanager:
     image: bde2020/hadoop-nodemanager:1.0.0
     hostname: nodemanager
+    expose:
+      - "8042"
+    environment:
+      VIRTUAL_HOST: hdfs-nodemanager.demo.big-data-europe.local
     env_file:
       - ./config/hadoop/hadoop.env
   datanode:
@@ -41,12 +54,17 @@ services:
     hostname: spark-master
     environment:
       INIT_DAEMON_STEP: setup_spark
+      VIRTUAL_HOST: spark-master.demo.big-data-europe.local
+      VIRTUAL_PORT: 8080
     volumes:
       - /home/docker/demo-spark-sensor-data/data/spark-master:/data
   worker:
     image: bde2020/spark-worker:1.5.1-hadoop2.6
     links:
       - "master:spark-master"
+    environment:
+      VIRTUAL_HOST: spark-worker.demo.big-data-europe.local
+      VIRTUAL_PORT: 8081
   demo:
     image: bde2020/demo-spark-sensor-data:v1.2.0
     environment:
@@ -59,7 +77,7 @@ services:
     volumes:
       - /home/docker/demo-spark-sensor-data/config/integrator:/app/config
     environment:
-      VIRTUAL_HOST: demo.big-data-europe.eu
+      VIRTUAL_HOST: demo.big-data-europe.local
   ###
   # mu.semte.ch stack
   ###
@@ -67,8 +85,8 @@ services:
     image: bde2020/pipeline-monitor-frontend:0.1.0
     links:
       - identifier:backend
-    ports:
-      - 80:80
+    environment:
+      VIRTUAL_HOST: monitor.demo.big-data-europe.local
   identifier:
     image: semtech/mu-identifier:1.0.0
   dispatcher:
@@ -80,8 +98,8 @@ services:
     environment:
       SPARQL_UPDATE: "true"
       DEFAULT_GRAPH: http://mu.semte.ch/application
-    ports:
-      - "8890:8890"
+      VIRTUAL_HOST: virtuoso.demo.big-data-europe.local
+      VIRTUAL_PORT: 8890
     volumes:
       - /home/docker/demo-spark-sensor-data/data/db:/data
   pipeline:
