@@ -54,10 +54,16 @@ services:
       HDFS_URL: hdfs://namenode:8020
     links:
       - "master:spark-master"
+  integratorui:
+    image: bde2020/integrator-ui:latest
+    volumes:
+      - /home/docker/demo-spark-sensor-data/config/integrator:/app/config
+    environment:
+      VIRTUAL_HOST: demo.big-data-europe.eu
   ###
   # mu.semte.ch stack
   ###
-  app:
+  monitor:
     image: bde2020/pipeline-monitor-frontend:0.1.0
     links:
       - identifier:backend
