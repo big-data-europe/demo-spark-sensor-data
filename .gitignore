@@ -18,4 +18,4 @@ hs_err_pid*
 target/
 *.zip
 
-data/db/*
+data/*
