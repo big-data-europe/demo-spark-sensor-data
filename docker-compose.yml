@@ -85,6 +85,30 @@ services:
       - ./config/integrator:/app/config
     environment:
       VIRTUAL_HOST: demo.big-data-europe.local
+  csswrapper:
+    image: madnificent/demo-spark-sensor-data-integrator-css-wrapper
+    ports:
+      - 80:80
+    links:
+      - namenode:namenode
+      - resourcemanager:resourcemanager
+      - nodemanager:nodemanager
+      - filebrowser:filebrowser
+      - master:master
+      - worker:worker
+      - integratorui:integratorui
+      - monitor:monitor
+      - database:database
+    depends_on:
+      - namenode
+      - resourcemanager
+      - nodemanager
+      - filebrowser
+      - master
+      - worker
+      - integratorui
+      - monitor
+      - database
   ###
   # mu.semte.ch stack
   ###
