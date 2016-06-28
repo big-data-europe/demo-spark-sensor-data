@@ -113,8 +113,7 @@ services:
     image: bde2020/pipeline-service:0.1.0
   initdaemon:
     image: bde2020/init-daemon-service:0.1.0
-
-networks:
-  default:
-    driver: overlay
+# networks:
+#   default:
+#     driver: overlay
 
