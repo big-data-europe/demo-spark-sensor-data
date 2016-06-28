@@ -8,7 +8,7 @@ services:
     image: bde2020/hadoop-namenode:1.0.0
     hostname: namenode
     volumes:
-      - /home/docker/demo-spark-sensor-data/data/hadoop/namenode:/hadoop/dfs/name
+      - ./data/hadoop/namenode:/hadoop/dfs/name
     expose:
       - "50070"
     environment:
@@ -32,7 +32,7 @@ services:
     image: bde2020/hadoop-historyserver:1.0.0
     hostname: historyserver
     volumes:
-      - /home/docker/demo-spark-sensor-data/data/hadoop/historyserver:/hadoop/yarn/timeline
+      - ./data/hadoop/historyserver:/hadoop/yarn/timeline
     env_file:
       - ./config/hadoop/hadoop.env
   nodemanager:
@@ -64,7 +64,7 @@ services:
       VIRTUAL_HOST: spark-master.demo.big-data-europe.local
       VIRTUAL_PORT: 8080
     volumes:
-      - /home/docker/demo-spark-sensor-data/data/spark-master:/data
+      - ./data/spark-master:/data
   worker:
     image: bde2020/spark-worker:1.5.1-hadoop2.6
     links:
@@ -82,7 +82,7 @@ services:
   integratorui:
     image: bde2020/integrator-ui:latest
     volumes:
-      - /home/docker/demo-spark-sensor-data/config/integrator:/app/config
+      - ./config/integrator:/app/config
     environment:
       VIRTUAL_HOST: demo.big-data-europe.local
   ###
@@ -99,7 +99,7 @@ services:
   dispatcher:
     image: semtech/mu-dispatcher:1.0.1
     volumes:
-      - /home/docker/demo-spark-sensor-data/config:/config
+      - ./config:/config
   database:
     image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
     environment:
@@ -108,7 +108,7 @@ services:
       VIRTUAL_HOST: virtuoso.demo.big-data-europe.local
       VIRTUAL_PORT: 8890
     volumes:
-      - /home/docker/demo-spark-sensor-data/data/db:/data
+      - ./data/db:/data
   pipeline:
     image: bde2020/pipeline-service:0.1.0
   initdaemon:
