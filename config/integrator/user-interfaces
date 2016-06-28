@@ -36,7 +36,7 @@
     "type": "user-interfaces",
     "attributes": {
       "label": "HDFS Resource manager",
-      "base-url": "http://hdfs-resourcemanager.demo.big-data-europe.local"
+      "base-url": "http://hdfsresource.demo.big-data-europe.local"
     }
   },
   {
