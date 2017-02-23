@@ -12,7 +12,7 @@ services:
       CSS_SOURCE: "hadoop"
       CLUSTER_NAME: test
       INIT_DAEMON_STEP: setup_hdfs
-      VIRTUAL_HOST: hdfs-namenode.demo.big-data-europe.local
+      VIRTUAL_HOST: hdfs-namenode.big-data-europe.aksw.org
     env_file:
       - ./config/hadoop/hadoop.env
   datanode:
@@ -24,7 +24,7 @@ services:
       - "50075"
     environment:
       CSS_SOURCE: "hadoop"
-      VIRTUAL_HOST: hdfs-datanode.demo.big-data-europe.local
+      VIRTUAL_HOST: hdfs-datanode.big-data-europe.aksw.org
       VIRTUAL_PORT: "50075"
     env_file:
       - ./config/hadoop/hadoop.env
@@ -38,7 +38,7 @@ services:
       - "8031"
       - "8088"
     environment:
-      VIRTUAL_HOST: hdfs-resourcemanager.demo.big-data-europe.local
+      VIRTUAL_HOST: hdfs-resourcemanager.big-data-europe.aksw.org
       VIRTUAL_PORT: "8088"
       CSS_SOURCE: "hadoop-resource-manager"
     env_file:
@@ -56,7 +56,7 @@ services:
     env_file:
       - ./config/hadoop/hadoop.env
     environment:
-      VIRTUAL_HOST: hdfs-historyserver.demo.big-data-europe.local
+      VIRTUAL_HOST: hdfs-historyserver.big-data-europe.aksw.org
       VIRTUAL_PORT: "8188"
       CSS_SOURCE: "hadoop-history-server"
     depends_on:
@@ -70,7 +70,7 @@ services:
     expose:
       - "8042"
     environment:
-      VIRTUAL_HOST: hdfs-nodemanager.demo.big-data-europe.local
+      VIRTUAL_HOST: hdfs-nodemanager.big-data-europe.aksw.org
       VIRTUAL_PORT: "8042"
       CSS_SOURCE: "hadoop-node-manager"
     env_file:
@@ -87,7 +87,7 @@ services:
       - "8088"
     environment:
       NAMENODE_HOST: namenode
-      VIRTUAL_HOST: hue.demo.big-data-europe.local
+      VIRTUAL_HOST: hue.big-data-europe.aksw.org
       VIRTUAL_PORT: "8088"
     depends_on:
       namenode:
@@ -100,7 +100,7 @@ services:
     environment:
       INIT_DAEMON_STEP: setup_spark
       CSS_SOURCE: "spark-master"
-      VIRTUAL_HOST: spark-master.demo.big-data-europe.local
+      VIRTUAL_HOST: spark-master.big-data-europe.aksw.org
       VIRTUAL_PORT: "8080"
     volumes:
       - ./data/spark-master:/data
@@ -116,7 +116,7 @@ services:
     environment:
       SPARK_MASTER: spark://spark-master:7077
       CSS_SOURCE: "spark-master"
-      VIRTUAL_HOST: spark-worker.demo.big-data-europe.local
+      VIRTUAL_HOST: spark-worker.big-data-europe.aksw.org
       VIRTUAL_PORT: "8081"
     depends_on:
       spark-master:
@@ -145,7 +145,7 @@ services:
     volumes:
       - ./config/integrator:/app/config
     environment:
-      VIRTUAL_HOST: demo.big-data-europe.local
+      VIRTUAL_HOST: demo.big-data-europe.aksw.org
 
   csswrapper:
     image: bde2020/nginx-proxy-with-css
@@ -161,7 +161,7 @@ services:
     links:
       - identifier:backend
     environment:
-      VIRTUAL_HOST: monitor.demo.big-data-europe.local
+      VIRTUAL_HOST: monitor.big-data-europe.aksw.org
   identifier:
     image: semtech/mu-identifier:1.0.0
   dispatcher:
@@ -173,7 +173,7 @@ services:
     environment:
       SPARQL_UPDATE: "true"
       DEFAULT_GRAPH: http://mu.semte.ch/application
-      VIRTUAL_HOST: virtuoso.demo.big-data-europe.local
+      VIRTUAL_HOST: virtuoso.big-data-europe.aksw.org
       VIRTUAL_PORT: "8890"
     volumes:
       - ./data/db:/data
