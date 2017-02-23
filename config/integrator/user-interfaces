@@ -27,7 +27,7 @@
     "id": 4,
     "type": "user-interfaces",
     "attributes": {
-      "label": "HDFS Namenode",
+      "label": "HDFS Datanode",
       "base-url": "http://hdfs-datanode.big-data-europe.aksw.org"
     }
   },
@@ -59,16 +59,8 @@
     "id": 8,
     "type": "user-interfaces",
     "attributes": {
-      "label": "Virtuoso",
-      "base-url": "http://virtuoso.big-data-europe.aksw.org"
-    }
-  },
-  {
-    "id": 9,
-    "type": "user-interfaces",
-    "attributes": {
-      "label": "Monitor",
-      "base-url": "http://monitor.big-data-europe.aksw.org"
+      "label": "PushMe",
+      "base-url": "http://bigknob.big-data-europe.aksw.org/index/"
     }
   }
 
