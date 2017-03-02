@@ -1,0 +1,164 @@
+version: '2.1'
+
+services:
+  data-stub:
+    image: bigknob
+    environment:
+      VIRTUAL_HOST: stub.demo.big-data-europe.local
+    healthcheck:
+      interval: 5s
+      timeout: 2s
+      retries: 1000
+  namenode:
+    image: bde2020/hadoop-namenode:1.1.0-hadoop2.7.1-java8
+    hostname: namenode
+    volumes:
+      - ./data/hadoop/namenode:/hadoop/dfs/name
+    expose:
+      - "50070"
+    environment:
+      CSS_SOURCE: "hadoop"
+      CLUSTER_NAME: test
+      INIT_DAEMON_STEP: setup_hdfs
+      VIRTUAL_HOST: hdfs-namenode.demo.big-data-europe.local
+    env_file:
+      - ./config/hadoop/hadoop.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:50070"]
+      interval: 5s
+      timeout: 2s
+      retries: 1000
+    depends_on:
+      data-stub:
+        condition: service_healthy
+  datanode:
+    image: bde2020/hadoop-datanode:1.1.0-hadoop2.7.1-java8
+    hostname: datanode
+    volumes:
+      - ./data/hadoop/datanode:/hadoop/dfs/data
+    expose:
+      - "50075"
+    environment:
+      CSS_SOURCE: "hadoop"
+      VIRTUAL_HOST: hdfs-datanode.demo.big-data-europe.local
+      VIRTUAL_PORT: "50075"
+    env_file:
+      - ./config/hadoop/hadoop.env
+    depends_on:
+      namenode:
+        condition: service_healthy
+    #healthcheck: 
+    #  disable: true
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:1.1.0-hadoop2.7.1-java8
+    hostname: resourcemanager
+    expose:
+      - "8031"
+      - "8088"
+    environment:
+      VIRTUAL_HOST: hdfs-resourcemanager.demo.big-data-europe.local
+      VIRTUAL_PORT: "8088"
+      CSS_SOURCE: "hadoop-resource-manager"
+    env_file:
+      - ./config/hadoop/hadoop.env
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+  historyserver:
+    image: bde2020/hadoop-historyserver:1.1.0-hadoop2.7.1-java8
+    hostname: historyserver
+    volumes:
+      - ./data/hadoop/historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./config/hadoop/hadoop.env
+    environment:
+      VIRTUAL_HOST: hdfs-historyserver.demo.big-data-europe.local
+      VIRTUAL_PORT: "8188"
+      CSS_SOURCE: "hadoop-history-server"
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:1.1.0-hadoop2.7.1-java8
+    hostname: nodemanager
+    expose:
+      - "8042"
+    environment:
+      VIRTUAL_HOST: hdfs-nodemanager.demo.big-data-europe.local
+      VIRTUAL_PORT: "8042"
+      CSS_SOURCE: "hadoop-node-manager"
+    env_file:
+      - ./config/hadoop/hadoop.env
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+  filebrowser:
+    image: bde2020/hdfs-filebrowser
+    hostname: filebrowser
+    expose:
+      - "8088"
+    environment:
+      NAMENODE_HOST: namenode
+      VIRTUAL_HOST: hue.demo.big-data-europe.local
+      VIRTUAL_PORT: "8088"
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+  spark-master:
+    image: bde2020/spark-master:2.0.0-hadoop2.7-hive-java8
+    hostname: spark-master
+    environment:
+      INIT_DAEMON_STEP: setup_spark
+      CSS_SOURCE: "spark-master"
+      VIRTUAL_HOST: spark-master.demo.big-data-europe.local
+      VIRTUAL_PORT: "8080"
+    volumes:
+      - ./data/spark-master:/data
+    env_file:
+      - ./config/hadoop/hadoop.env
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+  spark-worker:
+    image: bde2020/spark-worker:2.0.0-hadoop2.7-hive-java8
+    environment:
+      SPARK_MASTER: spark://spark-master:7077
+      CSS_SOURCE: "spark-master"
+      VIRTUAL_HOST: spark-worker.demo.big-data-europe.local
+      VIRTUAL_PORT: "8081"
+    depends_on:
+      spark-master:
+        condition: service_healthy
+
+  demo:
+    image: bde2020/demo-spark-sensor-data:2.0.0
+    environment:
+      INIT_DAEMON_STEP: compute_aggregations
+      HDFS_URL: hdfs://namenode:8020
+    depends_on:
+      data-stub:
+        condition: service_healthy
+
+  integratorui:
+    image: bde2020/integrator-ui:latest
+    volumes:
+      - ./config/integrator:/app/config
+    environment:
+      VIRTUAL_HOST: demo.big-data-europe.local
+
+  csswrapper:
+    image: bde2020/nginx-proxy-with-css
+    ports:
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
