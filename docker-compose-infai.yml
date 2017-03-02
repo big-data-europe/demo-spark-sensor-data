@@ -11,10 +11,14 @@ services:
     environment:
       CSS_SOURCE: "hadoop"
       CLUSTER_NAME: test
-      INIT_DAEMON_STEP: setup_hdfs
       VIRTUAL_HOST: hdfs-namenode.big-data-europe.aksw.org
     env_file:
       - ./config/hadoop/hadoop.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:50070"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   datanode:
     image: bde2020/hadoop-datanode:1.1.0-hadoop2.7.1-java8
     hostname: datanode
@@ -31,6 +35,11 @@ services:
     depends_on:
       namenode:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:50075"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:1.1.0-hadoop2.7.1-java8
     hostname: resourcemanager
@@ -98,7 +107,6 @@ services:
     image: bde2020/spark-master:2.0.0-hadoop2.7-hive-java8
     hostname: spark-master
     environment:
-      INIT_DAEMON_STEP: setup_spark
       CSS_SOURCE: "spark-master"
       VIRTUAL_HOST: spark-master.big-data-europe.aksw.org
       VIRTUAL_PORT: "8080"
@@ -111,6 +119,11 @@ services:
         condition: service_healthy
       datanode:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   spark-worker:
     image: bde2020/spark-worker:2.0.0-hadoop2.7-hive-java8
     environment:
@@ -121,6 +134,11 @@ services:
     depends_on:
       spark-master:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   data-stub:
     image: earthquakesan/bigknob
     depends_on:
@@ -130,11 +148,12 @@ services:
         condition: service_healthy
       spark-master:
         condition: service_healthy
-
+    environment:
+      VIRTUAL_HOST: bigknob.big-data-europe.aksw.org
+      VIRTUAL_PORT: "8000"
   demo:
     image: bde2020/demo-spark-sensor-data:2.0.0
     environment:
-      INIT_DAEMON_STEP: compute_aggregations
       HDFS_URL: hdfs://namenode:8020
     depends_on:
       data-stub:
@@ -156,28 +175,28 @@ services:
   ###
   # mu.semte.ch stack
   ###
-  monitor:
-    image: bde2020/pipeline-monitor-frontend:0.1.0
-    links:
-      - identifier:backend
-    environment:
-      VIRTUAL_HOST: monitor.big-data-europe.aksw.org
-  identifier:
-    image: semtech/mu-identifier:1.0.0
-  dispatcher:
-    image: semtech/mu-dispatcher:1.0.1
-    volumes:
-      - ./config:/config
-  database:
-    image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
-    environment:
-      SPARQL_UPDATE: "true"
-      DEFAULT_GRAPH: http://mu.semte.ch/application
-      VIRTUAL_HOST: virtuoso.big-data-europe.aksw.org
-      VIRTUAL_PORT: "8890"
-    volumes:
-      - ./data/db:/data
-  pipeline:
-    image: bde2020/mu-pipeline-service:0.1.0
-  initdaemon:
-    image: bde2020/mu-init-daemon-service:0.1.0
+  #monitor:
+  #  image: bde2020/pipeline-monitor-frontend:0.1.0
+  #  links:
+  #    - identifier:backend
+  #  environment:
+  #    VIRTUAL_HOST: monitor.big-data-europe.aksw.org
+  #identifier:
+  #  image: semtech/mu-identifier:1.0.0
+  #dispatcher:
+  #  image: semtech/mu-dispatcher:1.0.1
+  #  volumes:
+  #    - ./config:/config
+  #database:
+  #  image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
+  #  environment:
+  #    SPARQL_UPDATE: "true"
+  #    DEFAULT_GRAPH: http://mu.semte.ch/application
+  #    VIRTUAL_HOST: virtuoso.big-data-europe.aksw.org
+  #    VIRTUAL_PORT: "8890"
+  #  volumes:
+  #    - ./data/db:/data
+  #pipeline:
+  #  image: bde2020/mu-pipeline-service:0.1.0
+  #initdaemon:
+  #  image: bde2020/mu-init-daemon-service:0.1.0
